@@ -33,14 +33,21 @@ async function fetchWfmuPlays(): Promise<Play[]> {
 }
 
 function parseWfmuTime(timeStr: string): string {
-  const [time, period] = timeStr.trim().split(' ');
-  const [rawHours, minutes] = time.split(':').map(Number);
-  let hours = rawHours;
-  if (period === 'PM' && hours !== 12) hours += 12;
-  if (period === 'AM' && hours === 12) hours = 0;
-  const d = new Date();
-  d.setHours(hours, minutes, 0, 0);
-  return d.toISOString();
+  try {
+    const parts = timeStr.trim().split(' ');
+    if (parts.length < 2) return new Date().toISOString();
+    const [time, period] = parts;
+    const timeParts = time.split(':').map(Number);
+    if (timeParts.length < 2 || timeParts.some(isNaN)) return new Date().toISOString();
+    let [hours, minutes] = timeParts;
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    const d = new Date();
+    d.setHours(hours, minutes, 0, 0);
+    return d.toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
 }
 
 export const STATIONS: Station[] = [
