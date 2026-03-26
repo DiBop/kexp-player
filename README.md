@@ -23,24 +23,7 @@
 
 ## 🖥️ Screenshot
 
-```
-┌─────────────────────────────────┐
-│  ██████████  ● NOW PLAYING      │
-│  ██ art  ██  The Cure           │
-│  ██████████  Close to Me        │
-│              The Head on the    │
-│                                 │
-│  [▶]  ════════════════  🔊      │
-├─────────────────────────────────┤
-│  RECENTLY PLAYED                │
-│  ┌─────────────────────────┐   │
-│  │ 🎵 The Cure · Close to  │   │  ← current
-│  └─────────────────────────┘   │
-│    New Order · Blue Monday      │
-│    Pixies · Where Is My Mind    │
-│    Talking Heads · Psycho Killer│
-└─────────────────────────────────┘
-```
+![KEXP Player](docs/screenshot.png)
 
 ---
 
