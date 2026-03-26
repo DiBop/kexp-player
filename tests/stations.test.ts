@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { STATIONS, DEFAULT_STATION } from '../src/lib/stations';
+import { STATIONS, DEFAULT_STATION, parseWfmuTime } from '../src/lib/stations';
 
 describe('STATIONS registry', () => {
   it('has at least two stations', () => {
@@ -61,7 +61,7 @@ describe('WFMU fetchPlays', () => {
     expect(plays[0].album).toBe('Talking Heads: 77');
     expect(plays[0].image_uri).toBe('https://example.com/art.jpg');
     expect(plays[0].thumbnail_uri).toBe('https://example.com/art.jpg');
-    expect(typeof plays[0].airdate).toBe('string');
+    expect(new Date(plays[0].airdate).getTime()).not.toBeNaN();
   });
 
   it('filters out entries with no song or artist', async () => {
@@ -113,5 +113,47 @@ describe('WFMU fetchPlays', () => {
 
     const plays = await wfmu.fetchPlays();
     expect(plays).toHaveLength(0);
+  });
+
+  it('handles missing playlist key gracefully', async () => {
+    const wfmu = STATIONS.find(s => s.id === 'wfmu')!;
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    } as Response);
+
+    const plays = await wfmu.fetchPlays();
+    expect(plays).toHaveLength(0);
+  });
+});
+
+describe('parseWfmuTime', () => {
+  it('parses a valid 12-hour PM time', () => {
+    const result = parseWfmuTime('4:31 PM');
+    expect(new Date(result).getTime()).not.toBeNaN();
+    expect(new Date(result).getHours()).toBe(16);
+    expect(new Date(result).getMinutes()).toBe(31);
+  });
+
+  it('parses noon correctly', () => {
+    const result = parseWfmuTime('12:00 PM');
+    expect(new Date(result).getHours()).toBe(12);
+  });
+
+  it('parses midnight correctly', () => {
+    const result = parseWfmuTime('12:00 AM');
+    expect(new Date(result).getHours()).toBe(0);
+  });
+
+  it('falls back to current time on empty string', () => {
+    const before = Date.now();
+    const result = parseWfmuTime('');
+    expect(new Date(result).getTime()).toBeGreaterThanOrEqual(before);
+  });
+
+  it('falls back to current time on malformed input', () => {
+    const before = Date.now();
+    const result = parseWfmuTime('not-a-time');
+    expect(new Date(result).getTime()).toBeGreaterThanOrEqual(before);
   });
 });

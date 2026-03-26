@@ -32,7 +32,7 @@ async function fetchWfmuPlays(): Promise<Play[]> {
     }));
 }
 
-function parseWfmuTime(timeStr: string): string {
+export function parseWfmuTime(timeStr: string): string {
   try {
     const parts = timeStr.trim().split(' ');
     if (parts.length < 2) return new Date().toISOString();
