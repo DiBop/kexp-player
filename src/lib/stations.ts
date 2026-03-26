@@ -33,6 +33,8 @@ async function fetchWfmuPlays(): Promise<Play[]> {
 }
 
 export function parseWfmuTime(timeStr: string): string {
+  // WFMU returns times like "4:31 PM" with no timezone. We assume local time,
+  // which may be off for users outside US/Eastern (WFMU's broadcast timezone).
   try {
     const parts = timeStr.trim().split(' ');
     if (parts.length < 2) return new Date().toISOString();
