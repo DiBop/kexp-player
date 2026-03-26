@@ -7,6 +7,7 @@
   let isPlaying = false;
   let volume = 0.8;
   let activeUrl = '';
+  let playGeneration = 0;
 
   onMount(() => {
     audio = new Audio();
@@ -20,6 +21,7 @@
 
   // Stop audio immediately when streamUrl changes (station switch)
   $: if (audio && isPlaying && streamUrl !== activeUrl) {
+    playGeneration++;
     audio.pause();
     audio.src = '';
     isPlaying = false;
@@ -30,13 +32,14 @@
       audio.pause();
       isPlaying = false;
     } else {
+      const gen = ++playGeneration;
       activeUrl = streamUrl;
       audio.src = streamUrl;
       audio.play()
-        .then(() => { isPlaying = true; })
+        .then(() => { if (gen === playGeneration) isPlaying = true; })
         .catch((err) => {
           console.error('Audio playback failed:', err);
-          isPlaying = false;
+          if (gen === playGeneration) isPlaying = false;
         });
     }
   }
