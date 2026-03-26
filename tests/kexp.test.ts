@@ -51,4 +51,18 @@ describe('fetchRecentPlays', () => {
 
     await expect(fetchRecentPlays()).rejects.toThrow('KEXP API error: 503');
   });
+
+  it('filters out plays with no song or artist', async () => {
+    const musicPlay = { ...mockPlay };
+    const airbreak = { airdate: '2026-03-26T12:01:00Z', song: null, artist: null, album: null, image_uri: null, thumbnail_uri: null };
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ results: [musicPlay, airbreak] }),
+    } as Response);
+
+    const plays = await fetchRecentPlays();
+
+    expect(plays).toHaveLength(1);
+    expect(plays[0].artist).toBe('Simple Minds');
+  });
 });
