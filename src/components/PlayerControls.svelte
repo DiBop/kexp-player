@@ -1,14 +1,15 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
 
-  const STREAM_URL = 'https://kexp-mp3-128.streamguys1.com/kexp128.mp3';
+  export let streamUrl: string;
 
   let audio: HTMLAudioElement;
   let isPlaying = false;
   let volume = 0.8;
+  let activeUrl = '';
 
   onMount(() => {
-    audio = new Audio(STREAM_URL);
+    audio = new Audio();
     audio.volume = volume;
     audio.preload = 'none';
   });
@@ -17,12 +18,20 @@
     audio?.pause();
   });
 
+  // Stop audio immediately when streamUrl changes (station switch)
+  $: if (audio && isPlaying && streamUrl !== activeUrl) {
+    audio.pause();
+    audio.src = '';
+    isPlaying = false;
+  }
+
   function togglePlay() {
     if (isPlaying) {
       audio.pause();
       isPlaying = false;
     } else {
-      audio.src = STREAM_URL;
+      activeUrl = streamUrl;
+      audio.src = streamUrl;
       audio.play()
         .then(() => { isPlaying = true; })
         .catch((err) => {
