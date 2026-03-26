@@ -18,7 +18,7 @@
 <div class="feed-section">
   <div class="feed-header">RECENTLY PLAYED</div>
   <div class="feed">
-    {#each plays as play, i (play.airdate)}
+    {#each plays as play, i (`${play.airdate}-${play.song}`)}
       <button
         class="track-row"
         class:current={i === 0}
@@ -80,6 +80,7 @@
     border: none;
     background: transparent;
     color: inherit;
+    font: inherit;
     text-align: left;
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;

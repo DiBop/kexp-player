@@ -23,8 +23,12 @@
       isPlaying = false;
     } else {
       audio.src = STREAM_URL;
-      audio.play().catch(console.error);
-      isPlaying = true;
+      audio.play()
+        .then(() => { isPlaying = true; })
+        .catch((err) => {
+          console.error('Audio playback failed:', err);
+          isPlaying = false;
+        });
     }
   }
 
@@ -96,7 +100,7 @@
   }
 
   .play-btn:hover {
-    background: #f06292;
+    background: var(--accent-hover);
     transform: scale(1.05);
   }
 

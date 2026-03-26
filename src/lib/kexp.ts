@@ -1,7 +1,7 @@
 export interface Play {
   airdate: string;
-  song: string;
-  artist: string;
+  song: string | null;
+  artist: string | null;
   album: string | null;
   image_uri: string | null;
   thumbnail_uri: string | null;
@@ -17,5 +17,5 @@ export async function fetchRecentPlays(limit = 20): Promise<Play[]> {
   );
   if (!res.ok) throw new Error(`KEXP API error: ${res.status}`);
   const data: PlaysResponse = await res.json();
-  return data.results;
+  return data.results.filter((p) => p.song && p.artist);
 }
