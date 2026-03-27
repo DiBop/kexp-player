@@ -7,6 +7,7 @@ vi.mock('@tauri-apps/api/core', () => ({
 }));
 
 import { invoke } from '@tauri-apps/api/core';
+import { clearWfmuHistory } from '../src/lib/stations';
 
 describe('STATIONS registry', () => {
   it('has at least two stations', () => {
@@ -48,6 +49,7 @@ Talking Heads
 describe('WFMU fetchPlays', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    clearWfmuHistory();
   });
 
   it('parses song and artist from HTML response', async () => {

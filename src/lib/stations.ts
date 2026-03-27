@@ -9,20 +9,32 @@ export interface Station {
   fetchPlays: () => Promise<Play[]>;
 }
 
+const wfmuHistory: Play[] = [];
+export function clearWfmuHistory() { wfmuHistory.length = 0; }
+
 async function fetchWfmuPlays(): Promise<Play[]> {
   // Fetch via Rust to bypass CORS (WFMU has no Access-Control-Allow-Origin header)
   const html: string = await invoke('fetch_wfmu_html');
   // HTML contains: &quot;SONG&quot;\nby\nARTIST\n
   const match = html.match(/&quot;(.+?)&quot;\s*\nby\s*\n(.+?)\s*\n/);
-  if (!match) return [];
-  return [{
+  if (!match) return wfmuHistory.slice();
+
+  const current: Play = {
     airdate: new Date().toISOString(),
     song: match[1].trim(),
     artist: match[2].trim(),
     album: null,
     image_uri: null,
     thumbnail_uri: null,
-  }];
+  };
+
+  const last = wfmuHistory[0];
+  if (!last || last.song !== current.song || last.artist !== current.artist) {
+    wfmuHistory.unshift(current);
+    if (wfmuHistory.length > 10) wfmuHistory.pop();
+  }
+
+  return wfmuHistory.slice();
 }
 
 export const STATIONS: Station[] = [
