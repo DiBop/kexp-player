@@ -1,6 +1,8 @@
-# 📻 KEXP Player
+# 📻 KEXP & WFMU Player
 
-> A sleek Linux desktop app for streaming [KEXP 90.3 FM](https://www.kexp.org/) — Seattle's legendary independent radio station.
+A sleek Linux desktop app for streaming: 
+- [KEXP 90.3 FM](https://www.kexp.org/) — Seattle's legendary independent radio station
+- [WFMU 91.1 FM](https://wfmu.org/) — Listener-supported, independent community radio station in Jersey City, New Jersey
 
 ![License](https://img.shields.io/badge/license-MIT-pink?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Linux-blueviolet?style=flat-square)
@@ -12,11 +14,10 @@
 ## ✨ Features
 
 - 🎵 **Live streaming** — One-click play/pause for KEXP's 128kbps MP3 stream - WFMU also now streams
-- 🖼️ **Now Playing** — Album art, artist, song title, and album displayed prominently
+- 🖼️ **Now Playing** — KEXP - Album art, artist, song title, and album displayed prominently. WFMU - Now Playing and static list of recently played songs
 - 📜 **Scrollable feed** — Recently played tracks updated every 30 seconds
 - 🔍 **Quick search** — Click any track to search DuckDuckGo for that song
-- ✨ **Hover effects** — Tracks pop out smoothly when you mouse over them
-- 🌑 **Dark theme** — Easy on the eyes, CSS variable-driven so you can tweak it
+- 🌑 **Dark theme** — Easy on the eyes, CSS variable-driven so you can tweak it!
 - 🪶 **Lightweight** — Tauri means a ~13MB binary, not a 150MB Electron blob
 
 ---
