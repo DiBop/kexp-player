@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core';
 import type { Play } from './kexp';
 import { fetchRecentPlays } from './kexp';
 
@@ -9,9 +10,8 @@ export interface Station {
 }
 
 async function fetchWfmuPlays(): Promise<Play[]> {
-  const res = await fetch('https://wfmu.org/currentliveshows_aggregator.php?ch=1');
-  if (!res.ok) throw new Error(`WFMU API error: ${res.status}`);
-  const html = await res.text();
+  // Fetch via Rust to bypass CORS (WFMU has no Access-Control-Allow-Origin header)
+  const html: string = await invoke('fetch_wfmu_html');
   // HTML contains: &quot;SONG&quot;\nby\nARTIST\n
   const match = html.match(/&quot;(.+?)&quot;\s*\nby\s*\n(.+?)\s*\n/);
   if (!match) return [];

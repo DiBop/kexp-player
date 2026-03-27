@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { STATIONS, DEFAULT_STATION } from '../src/lib/stations';
 
+// Mock Tauri invoke (used by fetchWfmuPlays to bypass CORS)
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+}));
+
+import { invoke } from '@tauri-apps/api/core';
+
 describe('STATIONS registry', () => {
   it('has at least two stations', () => {
     expect(STATIONS.length).toBeGreaterThanOrEqual(2);
@@ -45,10 +52,7 @@ describe('WFMU fetchPlays', () => {
 
   it('parses song and artist from HTML response', async () => {
     const wfmu = STATIONS.find(s => s.id === 'wfmu')!;
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      text: async () => WFMU_HTML,
-    } as Response);
+    vi.mocked(invoke).mockResolvedValue(WFMU_HTML);
 
     const plays = await wfmu.fetchPlays();
 
@@ -63,22 +67,16 @@ describe('WFMU fetchPlays', () => {
 
   it('returns empty array when no match found in HTML', async () => {
     const wfmu = STATIONS.find(s => s.id === 'wfmu')!;
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      text: async () => '<html><body>No track info</body></html>',
-    } as Response);
+    vi.mocked(invoke).mockResolvedValue('<html><body>No track info</body></html>');
 
     const plays = await wfmu.fetchPlays();
     expect(plays).toHaveLength(0);
   });
 
-  it('throws on non-OK HTTP response', async () => {
+  it('throws when invoke rejects', async () => {
     const wfmu = STATIONS.find(s => s.id === 'wfmu')!;
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 503,
-    } as Response);
+    vi.mocked(invoke).mockRejectedValue(new Error('network error'));
 
-    await expect(wfmu.fetchPlays()).rejects.toThrow('WFMU API error: 503');
+    await expect(wfmu.fetchPlays()).rejects.toThrow('network error');
   });
 });
