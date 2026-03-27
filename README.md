@@ -11,7 +11,7 @@
 
 ## ✨ Features
 
-- 🎵 **Live streaming** — One-click play/pause for KEXP's 128kbps MP3 stream
+- 🎵 **Live streaming** — One-click play/pause for KEXP's 128kbps MP3 stream - WFMU also now streams
 - 🖼️ **Now Playing** — Album art, artist, song title, and album displayed prominently
 - 📜 **Scrollable feed** — Recently played tracks updated every 30 seconds
 - 🔍 **Quick search** — Click any track to search DuckDuckGo for that song
