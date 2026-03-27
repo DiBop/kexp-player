@@ -9,47 +9,20 @@ export interface Station {
 }
 
 async function fetchWfmuPlays(): Promise<Play[]> {
-  const res = await fetch('https://wfmu.org/api/now-playing');
+  const res = await fetch('https://wfmu.org/currentliveshows_aggregator.php?ch=1');
   if (!res.ok) throw new Error(`WFMU API error: ${res.status}`);
-  const data = await res.json();
-  const playlist: Array<{
-    time: string;
-    song_title: string | null;
-    artist_name: string | null;
-    album: string | null;
-    image_url: string | null;
-  }> = data.playlist ?? [];
-
-  return playlist
-    .filter((entry) => entry.song_title && entry.artist_name)
-    .map((entry) => ({
-      airdate: parseWfmuTime(entry.time),
-      song: entry.song_title,
-      artist: entry.artist_name,
-      album: entry.album,
-      image_uri: entry.image_url,
-      thumbnail_uri: entry.image_url,
-    }));
-}
-
-export function parseWfmuTime(timeStr: string): string {
-  // WFMU returns times like "4:31 PM" with no timezone. We assume local time,
-  // which may be off for users outside US/Eastern (WFMU's broadcast timezone).
-  try {
-    const parts = timeStr.trim().split(' ');
-    if (parts.length < 2) return new Date().toISOString();
-    const [time, period] = parts;
-    const timeParts = time.split(':').map(Number);
-    if (timeParts.length < 2 || timeParts.some(isNaN)) return new Date().toISOString();
-    let [hours, minutes] = timeParts;
-    if (period === 'PM' && hours !== 12) hours += 12;
-    if (period === 'AM' && hours === 12) hours = 0;
-    const d = new Date();
-    d.setHours(hours, minutes, 0, 0);
-    return d.toISOString();
-  } catch {
-    return new Date().toISOString();
-  }
+  const html = await res.text();
+  // HTML contains: &quot;SONG&quot;\nby\nARTIST\n
+  const match = html.match(/&quot;(.+?)&quot;\s*\nby\s*\n(.+?)\s*\n/);
+  if (!match) return [];
+  return [{
+    airdate: new Date().toISOString(),
+    song: match[1].trim(),
+    artist: match[2].trim(),
+    album: null,
+    image_uri: null,
+    thumbnail_uri: null,
+  }];
 }
 
 export const STATIONS: Station[] = [
@@ -62,7 +35,7 @@ export const STATIONS: Station[] = [
   {
     id: 'wfmu',
     name: 'WFMU 91.1 FM',
-    streamUrl: 'https://stream.wfmu.org/freeform-128k.mp3',
+    streamUrl: 'https://stream0.wfmu.org/freeform-128k',
     fetchPlays: fetchWfmuPlays,
   },
 ];

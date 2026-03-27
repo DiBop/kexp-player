@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { STATIONS, DEFAULT_STATION, parseWfmuTime } from '../src/lib/stations';
+import { STATIONS, DEFAULT_STATION } from '../src/lib/stations';
 
 describe('STATIONS registry', () => {
   it('has at least two stations', () => {
@@ -27,30 +27,27 @@ describe('STATIONS registry', () => {
 
   it('WFMU station has correct stream URL', () => {
     const wfmu = STATIONS.find(s => s.id === 'wfmu')!;
-    expect(wfmu.streamUrl).toBe('https://stream.wfmu.org/freeform-128k.mp3');
+    expect(wfmu.streamUrl).toBe('https://stream0.wfmu.org/freeform-128k');
   });
 });
+
+const WFMU_HTML = `<div class="bigline">
+<span class="KDBFavIcon KDBsong" id="KDBsong-123"></span>
+&quot;Psycho Killer&quot;
+by
+Talking Heads
+</div>`;
 
 describe('WFMU fetchPlays', () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it('maps playlist entries to Play interface', async () => {
+  it('parses song and artist from HTML response', async () => {
     const wfmu = STATIONS.find(s => s.id === 'wfmu')!;
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({
-        playlist: [
-          {
-            time: '4:31 PM',
-            song_title: 'Psycho Killer',
-            artist_name: 'Talking Heads',
-            album: 'Talking Heads: 77',
-            image_url: 'https://example.com/art.jpg',
-          },
-        ],
-      }),
+      text: async () => WFMU_HTML,
     } as Response);
 
     const plays = await wfmu.fetchPlays();
@@ -58,40 +55,21 @@ describe('WFMU fetchPlays', () => {
     expect(plays).toHaveLength(1);
     expect(plays[0].song).toBe('Psycho Killer');
     expect(plays[0].artist).toBe('Talking Heads');
-    expect(plays[0].album).toBe('Talking Heads: 77');
-    expect(plays[0].image_uri).toBe('https://example.com/art.jpg');
-    expect(plays[0].thumbnail_uri).toBe('https://example.com/art.jpg');
+    expect(plays[0].album).toBeNull();
+    expect(plays[0].image_uri).toBeNull();
+    expect(plays[0].thumbnail_uri).toBeNull();
     expect(new Date(plays[0].airdate).getTime()).not.toBeNaN();
   });
 
-  it('filters out entries with no song or artist', async () => {
+  it('returns empty array when no match found in HTML', async () => {
     const wfmu = STATIONS.find(s => s.id === 'wfmu')!;
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({
-        playlist: [
-          {
-            time: '4:31 PM',
-            song_title: 'Psycho Killer',
-            artist_name: 'Talking Heads',
-            album: null,
-            image_url: null,
-          },
-          {
-            time: '4:28 PM',
-            song_title: null,
-            artist_name: null,
-            album: null,
-            image_url: null,
-          },
-        ],
-      }),
+      text: async () => '<html><body>No track info</body></html>',
     } as Response);
 
     const plays = await wfmu.fetchPlays();
-
-    expect(plays).toHaveLength(1);
-    expect(plays[0].artist).toBe('Talking Heads');
+    expect(plays).toHaveLength(0);
   });
 
   it('throws on non-OK HTTP response', async () => {
@@ -102,58 +80,5 @@ describe('WFMU fetchPlays', () => {
     } as Response);
 
     await expect(wfmu.fetchPlays()).rejects.toThrow('WFMU API error: 503');
-  });
-
-  it('handles empty playlist gracefully', async () => {
-    const wfmu = STATIONS.find(s => s.id === 'wfmu')!;
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ playlist: [] }),
-    } as Response);
-
-    const plays = await wfmu.fetchPlays();
-    expect(plays).toHaveLength(0);
-  });
-
-  it('handles missing playlist key gracefully', async () => {
-    const wfmu = STATIONS.find(s => s.id === 'wfmu')!;
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({}),
-    } as Response);
-
-    const plays = await wfmu.fetchPlays();
-    expect(plays).toHaveLength(0);
-  });
-});
-
-describe('parseWfmuTime', () => {
-  it('parses a valid 12-hour PM time', () => {
-    const result = parseWfmuTime('4:31 PM');
-    expect(new Date(result).getTime()).not.toBeNaN();
-    expect(new Date(result).getHours()).toBe(16);
-    expect(new Date(result).getMinutes()).toBe(31);
-  });
-
-  it('parses noon correctly', () => {
-    const result = parseWfmuTime('12:00 PM');
-    expect(new Date(result).getHours()).toBe(12);
-  });
-
-  it('parses midnight correctly', () => {
-    const result = parseWfmuTime('12:00 AM');
-    expect(new Date(result).getHours()).toBe(0);
-  });
-
-  it('falls back to current time on empty string', () => {
-    const before = Date.now();
-    const result = parseWfmuTime('');
-    expect(new Date(result).getTime()).toBeGreaterThanOrEqual(before);
-  });
-
-  it('falls back to current time on malformed input', () => {
-    const before = Date.now();
-    const result = parseWfmuTime('not-a-time');
-    expect(new Date(result).getTime()).toBeGreaterThanOrEqual(before);
   });
 });
