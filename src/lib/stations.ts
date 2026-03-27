@@ -9,8 +9,12 @@ export interface Station {
   fetchPlays: () => Promise<Play[]>;
 }
 
-const wfmuHistory: Play[] = [];
-export function clearWfmuHistory() { wfmuHistory.length = 0; }
+const WFMU_HISTORY_KEY = 'wfmu-history';
+const wfmuHistory: Play[] = JSON.parse(localStorage.getItem(WFMU_HISTORY_KEY) ?? '[]');
+export function clearWfmuHistory() {
+  wfmuHistory.length = 0;
+  localStorage.removeItem(WFMU_HISTORY_KEY);
+}
 
 async function fetchWfmuPlays(): Promise<Play[]> {
   // Fetch via Rust to bypass CORS (WFMU has no Access-Control-Allow-Origin header)
@@ -32,6 +36,7 @@ async function fetchWfmuPlays(): Promise<Play[]> {
   if (!last || last.song !== current.song || last.artist !== current.artist) {
     wfmuHistory.unshift(current);
     if (wfmuHistory.length > 10) wfmuHistory.pop();
+    localStorage.setItem(WFMU_HISTORY_KEY, JSON.stringify(wfmuHistory));
   }
 
   return wfmuHistory.slice();
