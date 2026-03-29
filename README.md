@@ -1,6 +1,6 @@
 # 📻 KEXP & WFMU Player
 
-A sleek Linux desktop app for streaming: 
+A sleek vibe-coded Linux desktop app for streaming: 
 - [KEXP 90.3 FM](https://www.kexp.org/) — Seattle's legendary independent radio station
 - [WFMU 91.1 FM](https://wfmu.org/) — Listener-supported, independent community radio station in Jersey City, New Jersey
 
