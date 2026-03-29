@@ -9,7 +9,13 @@ A sleek Linux desktop app for streaming:
 ![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-orange?style=flat-square)
 ![Built with Svelte](https://img.shields.io/badge/frontend-SvelteKit-red?style=flat-square)
 
+
+#### ⚠️ Disclaimer
+
+This project and its maintainer are not affiliated nor associated with KEXP or WFMU
+
 ---
+
 
 ## ✨ Features
 
