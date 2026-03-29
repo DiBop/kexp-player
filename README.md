@@ -10,11 +10,9 @@ A sleek Linux desktop app for streaming:
 ![Built with Svelte](https://img.shields.io/badge/frontend-SvelteKit-red?style=flat-square)
 
 
-#### ⚠️ Disclaimer
+## ⚠️ Disclaimer
 
 This project and its maintainer are not affiliated nor associated with KEXP or WFMU
-
----
 
 
 ## ✨ Features
