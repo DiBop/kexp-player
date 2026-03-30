@@ -28,7 +28,7 @@ This project and its maintainer are not affiliated nor associated with KEXP or W
 
 ## 🖥️ Screenshot
 
-![KEXP Player](docs/screenshot.png)
+![KEXP Player](docs/kexp-wmfu-player-1.png)
 
 ---
 
