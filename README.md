@@ -86,6 +86,81 @@ npm test
 
 ---
 
+## 🗺️ Architecture
+
+```mermaid
+graph TD
+    User["👤 User"]
+
+    subgraph Desktop["Linux Desktop"]
+        subgraph Tauri["Tauri App — kexp-player"]
+            subgraph Frontend["Svelte Frontend"]
+                SS["StationSelector\ndropdown"]
+                NP["NowPlaying\nart · song · artist · album"]
+                PC["PlayerControls\nplay/pause · volume"]
+                TF["TrackFeed\nrecently played · click to search"]
+            end
+
+            subgraph Backend["Rust Backend"]
+                CMD["fetch_wfmu_html\nTauri command"]
+                SHL["plugin-shell\nopen URLs"]
+            end
+
+            subgraph State["App State (page.svelte)"]
+                SEL["selectedStation"]
+                PLAYS["plays array"]
+                POLL["30s poll interval"]
+            end
+
+            LS["💾 localStorage\nwfmu-history (up to 10 tracks)"]
+        end
+    end
+
+    subgraph Internet["Internet"]
+        subgraph KEXP["KEXP 90.3 FM"]
+            KS["Stream\nkexp-mp3-128.streamguys1.com"]
+            KA["REST API\napi.kexp.org/v2/plays\nreturns JSON · CORS enabled"]
+        end
+
+        subgraph WFMU["WFMU 91.1 FM"]
+            WS["Stream\nstream0.wfmu.org/freeform-128k"]
+            WA["Now Playing Page\nwfmu.org/currentliveshows_aggregator\nreturns HTML · no CORS"]
+        end
+
+        DDG["🔍 DuckDuckGo"]
+    end
+
+    User -->|selects station| SS
+    User -->|play · pause · volume| PC
+    User -->|clicks track| TF
+
+    SS -->|updates| SEL
+    SEL -->|triggers| POLL
+    POLL -->|calls fetchPlays every 30s| State
+
+    State -->|KEXP: fetch JSON directly| KA
+    State -->|WFMU: invoke Rust command| CMD
+    CMD -->|reqwest HTTP GET\nbypasses CORS| WA
+    WA -->|raw HTML| CMD
+    CMD -->|HTML string| Frontend
+    Frontend -->|regex parse\nsong · artist| PLAYS
+
+    KA -->|song · artist · album · art| PLAYS
+    PLAYS -->|plays[0]| NP
+    PLAYS -->|full list| TF
+
+    PC -->|audio src| KS
+    PC -->|audio src| WS
+
+    TF -->|new WFMU track| LS
+    LS -->|load on startup| PLAYS
+
+    TF -->|artist + song query| SHL
+    SHL -->|opens browser| DDG
+```
+
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Tech |
