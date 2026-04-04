@@ -1,8 +1,8 @@
 [package]
 name = "kexp-player"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Linux desktop app for streaming KEXP 90.3 FM and WFMU 91.1 FM with now-playing feed"
+authors = ["DiBop"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
